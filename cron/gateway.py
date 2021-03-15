@@ -42,10 +42,36 @@ def on_mqtt_publish(client,userdata,result):             #create function for ca
     print("MQTT data published \n")
     pass
 
+mqtt_connected = 0
+
+def on_connect(client, userdata, flags, rc):
+   global mqtt_connected
+   mqtt_connected = 1
+
+def on_disconnect(client, userdata, rc):
+   global mqtt_connected
+   mqtt_connected = 0
+
+def mqtt_client_publish(topic, msg):
+	try:
+		global mqtt_connected
+		if mqtt_connected == 0:
+			mqtt_client.connect("localhost", 1883)
+		mqtt_client.publish(topic, msg)
+	except Exception as e:
+		print(format(e))
+
 mqtt_client = paho.Client("mqtt1")
+mqtt_client.on_connect = on_connect
+mqtt_client.on_disconnect = on_disconnect
 mqtt_client.on_publish = on_mqtt_publish
 mqtt_client.connect("localhost", 1883)
-mqtt_client.publish("pihome/gateway-recv/started", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+mqtt_client_publish("pihome/gateway-recv/started", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+mqtt_client_summaryTopic = "emon/pihome"
+for nodeid in ["20", "21", "30"]:
+	for suffix in ["", "_0", "_battery_V", "_battery_level"]:
+		mqtt_client_publish("%s/%s", (mqtt_client_summaryTopic, nodeid, suffix), "")
 
 # Get the local ip address
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -230,13 +256,19 @@ try:
 					print("Sub Type:                    ",sub_type)
 					print("Pay Load:                    ",payload)
 
-				mqtt_client.publish("pihome/gateway-recv/msg/timestamp", 		datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-				mqtt_client.publish("pihome/gateway-recv/msg/node_id", 			node_id)
-				mqtt_client.publish("pihome/gateway-recv/msg/child_sensor_id",	child_sensor_id)
-				mqtt_client.publish("pihome/gateway-recv/msg/message_type", 	message_type)
-				mqtt_client.publish("pihome/gateway-recv/msg/ack", 				ack)
-				mqtt_client.publish("pihome/gateway-recv/msg/sub_type", 		sub_type)
-				mqtt_client.publish("pihome/gateway-recv/msg/payload", 			payload)
+				try:
+					if mqtt_connected == 0:
+						mqtt_client.connect("localhost", 1883)
+
+					mqtt_client.publish("pihome/gateway-recv/msg/timestamp", 		datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+					mqtt_client.publish("pihome/gateway-recv/msg/node_id", 			node_id)
+					mqtt_client.publish("pihome/gateway-recv/msg/child_sensor_id",	child_sensor_id)
+					mqtt_client.publish("pihome/gateway-recv/msg/message_type", 	message_type)
+					mqtt_client.publish("pihome/gateway-recv/msg/ack", 				ack)
+					mqtt_client.publish("pihome/gateway-recv/msg/sub_type", 		sub_type)
+					mqtt_client.publish("pihome/gateway-recv/msg/payload", 			payload)
+				except Exception as e:
+					print(format(e))
 
 				# ..::Step One::..
 				# First time Temperature Sensors Node Comes online: Add Node to The Nodes Table.
@@ -257,7 +289,7 @@ try:
 						cur.execute('UPDATE nodes SET ms_version = %s where node_id = %s', (payload, node_id))
 						con.commit()
 
-					mqtt_client.publish(('pihome/sensors/%s/%s', (node_id, ms_version)), payload)
+					mqtt_client_publish(('pihome/sensors/%s/%s', (node_id, ms_version)), payload)
 
 				# ..::Step One B::..
 				# First time Node Comes online with Repeater Feature Enabled: Add Node to The Nodes Table.
@@ -322,12 +354,12 @@ try:
 					cur.execute('UPDATE `nodes` SET `last_seen`=now(), `sync`=0  WHERE node_id = %s', [node_id])
 					con.commit()
 
-					mqtt_client.publish('pihome/sensors/%s/%s' % (node_id, "last_seem"), timestamp)
-					mqtt_client.publish('pihome/sensors/%s/%s' % (node_id, "payload"), payload)
-					mqtt_client.publish('pihome/sensors/%s/%s/%s' % (node_id, child_sensor_id, "payload"), payload)
+					mqtt_client_publish('pihome/sensors/%s/%s' % (node_id, "last_seem"), timestamp)
+					mqtt_client_publish('pihome/sensors/%s/%s' % (node_id, "payload"), payload)
+					mqtt_client_publish('pihome/sensors/%s/%s/%s' % (node_id, child_sensor_id, "payload"), payload)
 
-					mqtt_client.publish('pihome/summary/%s' % (node_id), payload)
-					mqtt_client.publish('pihome/summary/%s_%s' % (node_id, child_sensor_id), payload)
+					mqtt_client_publish('%s/%s' % (mqtt_client_summaryTopic,node_id), payload)
+					mqtt_client_publish('%s/%s_%s' % (mqtt_client_summaryTopic,node_id, child_sensor_id), payload)
 
                     # Check is sensor is attached to a zone which is being graphed
 					cur.execute('SELECT * FROM `zone_view` where sensors_id = (%s) AND sensor_child_id = (%s) LIMIT 1;', (node_id, child_sensor_id))
@@ -363,8 +395,8 @@ try:
 					##cur.execute('UPDATE `nodes` SET `last_seen`=now() WHERE node_id = %s', [node_id])
 					con.commit()
 
-					mqtt_client.publish('pihome/sensors/%s/%s' % (node_id, "battery_V"), payload)
-					mqtt_client.publish('pihome/summary/%s_battery_V' % (node_id), payload)
+					mqtt_client_publish('pihome/sensors/%s/%s' % (node_id, "battery_V"), payload)
+					mqtt_client_publish('%s/%s_battery_V' % (mqtt_client_summaryTopic,node_id), payload)
 
 
 				# ..::Step Seven::..
@@ -378,8 +410,8 @@ try:
 					cur.execute('UPDATE nodes SET last_seen=now(), `sync`=0 WHERE node_id = %s', [node_id])
 					con.commit()
 
-					mqtt_client.publish('pihome/sensors/%s/%s' % (node_id, "battery_level"), payload)
-					mqtt_client.publish('pihome/summary/%s_battery_level' % (node_id), payload)
+					mqtt_client_publish('pihome/sensors/%s/%s' % (node_id, "battery_level"), payload)
+					mqtt_client_publish('%s/%s_battery_level' % (mqtt_client_summaryTopic,node_id), payload)
 
 				# ..::Step Eight::..
 				# Add Boost Status Level to Database/Relay Last seen gets added here as well when ACK is set to 1 in messages_out table.
