@@ -326,6 +326,8 @@ try:
 					mqtt_client.publish('pihome/sensors/%s/%s' % (node_id, "payload"), payload)
 					mqtt_client.publish('pihome/sensors/%s/%s/%s' % (node_id, child_sensor_id, "payload"), payload)
 
+					mqtt_client.publish('pihome/summary/%s' % (node_id), payload)
+					mqtt_client.publish('pihome/summary/%s_%s' % (node_id, child_sensor_id), payload)
 
                     # Check is sensor is attached to a zone which is being graphed
 					cur.execute('SELECT * FROM `zone_view` where sensors_id = (%s) AND sensor_child_id = (%s) LIMIT 1;', (node_id, child_sensor_id))
@@ -362,6 +364,7 @@ try:
 					con.commit()
 
 					mqtt_client.publish('pihome/sensors/%s/%s' % (node_id, "battery_V"), payload)
+					mqtt_client.publish('pihome/summary/%s_battery_V' % (node_id), payload)
 
 
 				# ..::Step Seven::..
@@ -376,6 +379,7 @@ try:
 					con.commit()
 
 					mqtt_client.publish('pihome/sensors/%s/%s' % (node_id, "battery_level"), payload)
+					mqtt_client.publish('pihome/summary/%s_battery_level' % (node_id), payload)
 
 				# ..::Step Eight::..
 				# Add Boost Status Level to Database/Relay Last seen gets added here as well when ACK is set to 1 in messages_out table.
