@@ -71,7 +71,7 @@ mqtt_client_publish("pihome/gateway-recv/started", datetime.now().strftime('%Y-%
 mqtt_client_summaryTopic = "emon/pihome"
 for nodeid in ["20", "21", "30"]:
 	for suffix in ["", "_0", "_battery_V", "_battery_level"]:
-		mqtt_client_publish("%s/%s", (mqtt_client_summaryTopic, nodeid, suffix), "")
+		mqtt_client_publish("%s/%s%s" % (mqtt_client_summaryTopic, nodeid, suffix), " ")
 
 # Get the local ip address
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
