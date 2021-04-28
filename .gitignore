@@ -1,2 +1,7 @@
 st_inc/db_config.ini
 logs/main.log
+.vs/ProjectSettings.json
+*.suo
+Browse.VC.db*
+
+.vs/slnx.sqlite
