@@ -104,6 +104,9 @@ require_once(__DIR__.'/st_inc/functions.php');
         <!-- Navigation -->
         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
 		<a class="navbar-brand" href="home.php"><img src="images/amur_leopard.png" width="42"></a>
+
+        <span style="line-height:50px; align-items:center" >Modified PiHome</span>
+        
             <!-- /.navbar-header -->
             <ul class="nav navbar-top-links navbar-right">
                <li class="dropdown">
