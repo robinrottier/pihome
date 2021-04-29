@@ -28,7 +28,8 @@ RUN apk add php7 \
     php7-opcache \
     php7-mysqli \
     php7-zip \
-    php7-mbstring
+    php7-mbstring \
+    php7-session 
 
 ##    php7-phar \
 ##    php7-zlib \
@@ -41,7 +42,7 @@ RUN apk add php7 \
 ##    php7-dom \
 ##    php7-iconv \
 ##    php7-xdebug \
-##    php7-session \
+
 ##    php7-intl \
 ##    php7-apcu \
 ##    php7-tokenizer \
@@ -82,10 +83,30 @@ RUN sed -i 's#display_errors = Off#display_errors = On#' /etc/php7/php.ini && \
 ##    echo "xdebug.idekey=PHPSTORM" >> /etc/php7/conf.d/xdebug.ini && \ 
 ##    echo "xdebug.remote_log=\"/tmp/xdebug.log\"" >> /etc/php7/conf.d/xdebug.ini
 
-COPY entry.sh /entry.sh
-RUN chmod u+x /entry.sh
+WORKDIR /
+COPY docker/entry.sh .
+RUN chmod u+x entry.sh
 
-RUN git clone https://github.com/robinrottier/pihome "/var/www/pihome"
+# clone from github
+# RUN git clone https://github.com/robinrottier/pihome "/var/www/pihome"
+# OR copy files from here
+WORKDIR /var/www/pihome
+COPY *.php ./
+COPY *.txt ./
+COPY *.json ./
+COPY *.py ./
+COPY cron cron/
+COPY api api/
+COPY css css/
+COPY fonts fonts/
+COPY images images/
+COPY js js/
+COPY languages languages/
+COPY st_inc st_inc/
+COPY MySQL_Database MySQL_Database/
+
+WORKDIR /etc/apache2
+COPY docker/*.conf conf.d
 
 WORKDIR /var/www/localhost/htdocs/
 
