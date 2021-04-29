@@ -6,7 +6,7 @@ LABEL repos="https://github.com/robinrottier/pihome"
 # Timezone
 ENV TIMEZONE Europe/London
 
-ENV MYSQL_ROOT_PASSWORD pihome2018
+ENV MYSQL_ROOT_PASSWORD passw0rd
 
 RUN apk update && apk upgrade
 RUN apk add \
@@ -87,6 +87,9 @@ WORKDIR /
 COPY docker/entry.sh .
 RUN chmod u+x entry.sh
 
+WORKDIR /etc/apache2
+COPY docker/*.conf conf.d
+
 # clone from github
 # RUN git clone https://github.com/robinrottier/pihome "/var/www/pihome"
 # OR copy files from here
@@ -104,13 +107,16 @@ COPY js js/
 COPY languages languages/
 COPY st_inc st_inc/
 COPY MySQL_Database MySQL_Database/
+RUN echo "pihome website copied"
 
-WORKDIR /etc/apache2
-COPY docker/*.conf conf.d
+WORKDIR /
+COPY docker/setup_mysql.sh .
+RUN chmod u+x ./setup_mysql.sh
+## RUN ./setup_mysql.sh
 
-WORKDIR /var/www/localhost/htdocs/
+WORKDIR /var/www/pihome
 
 EXPOSE 80
 EXPOSE 3306
 
-ENTRYPOINT ["/entry.sh"]
+## ENTRYPOINT ["/entry.sh"]

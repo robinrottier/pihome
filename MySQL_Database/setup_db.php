@@ -42,7 +42,8 @@ foreach ($settings as $key => $setting) {
 
 echo "\033[32mMake Sure you have correct MySQL/MariaDB credentials as following \033[0m\n";
 echo "Hostname:     ".$hostname."\n";
-echo "User Name:    ".$dbname."\n";
+echo "DB Name:      ".$dbname."\n";
+echo "Username:     ".$dbusername."\n";
 echo "Password:     ".$dbpassword."\n";
 echo "\033[36m".date('Y-m-d H:i:s'). "\033[0m - Are you sure you want to do this?  Type 'yes' to continue? \n Exiting Database will be Deleted. \n";
 echo $line;
