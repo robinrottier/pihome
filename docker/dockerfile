@@ -111,8 +111,7 @@ RUN echo "pihome website copied"
 
 WORKDIR /
 COPY docker/setup_mysql.sh .
-RUN chmod u+x ./setup_mysql.sh
-## RUN ./setup_mysql.sh
+#RUN chmod u+x ./setup_mysql.sh && ./setup_mysql.sh
 
 WORKDIR /var/www/pihome
 
