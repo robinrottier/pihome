@@ -38,15 +38,28 @@ function shell()
     docker exec -it $image ash
 }
 
-"Run docker build..."
-build
-if ($LASTEXITCODE -ne 0) { write-host -ForegroundColor Red "...failed ($LASTEXITCODE)"; return }
+function runAll()
+{
+    "Run docker build..."
+    build
+    if ($LASTEXITCODE -ne 0) { write-host -ForegroundColor Red "...failed ($LASTEXITCODE)"; return }
 
-return
-"Running detached image..."
-run
-if ($LASTEXITCODE -ne 0) { write-host -ForegroundColor Red "...failed ($LASTEXITCODE)"; return }
+    return
 
-"Starting shell..."
-shell
-if ($LASTEXITCODE -ne 0) { write-host -ForegroundColor Red "...failed ($LASTEXITCODE)"; return }
+    "Running detached image..."
+    run
+    if ($LASTEXITCODE -ne 0) { write-host -ForegroundColor Red "...failed ($LASTEXITCODE)"; return }
+
+    "Starting shell..."
+    shell
+    if ($LASTEXITCODE -ne 0) { write-host -ForegroundColor Red "...failed ($LASTEXITCODE)"; return }
+}
+
+if ($args[0])
+{
+    &$args[0]
+}
+else
+{
+    runAll    
+}

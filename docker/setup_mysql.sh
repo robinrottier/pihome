@@ -34,18 +34,13 @@ fi
 
 cat << EOF > $tfile
     USE mysql;
-    DELETE FROM user;
-    FLUSH PRIVILEGES;
     GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY "$MYSQL_ROOT_PASSWORD" WITH GRANT OPTION;
     GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
     UPDATE user SET password=PASSWORD("") WHERE user='root' AND host='localhost';
-    
-    CREATE USER 'pihomedbadmin'@'localhost' IDENTIFIED BY 'pihome2018';
+    GRANT ALL PRIVILEGES ON *.* TO 'pihomedbadmin'@'%' IDENTIFIED BY "pihome2018" WITH GRANT OPTION;
     GRANT ALL PRIVILEGES ON *.* TO 'pihomedbadmin'@'localhost' WITH GRANT OPTION;
-
-    CREATE USER 'piphpmyadmin'@'localhost' IDENTIFIED BY 'pihome2018';
+    GRANT ALL PRIVILEGES ON *.* TO 'piphpmyadmin'@'%' IDENTIFIED BY "pihome2018" WITH GRANT OPTION;
     GRANT ALL PRIVILEGES ON *.* TO 'piphpmyadmin'@'localhost' WITH GRANT OPTION;
-    
     FLUSH PRIVILEGES;
 EOF
 
@@ -56,11 +51,11 @@ echo "Done query"
 
 # start mysql
 # nohup mysqld_safe --skip-grant-tables --bind-address 0.0.0.0 --user mysql > /dev/null 2>&1 &
-echo "Starting mariadb database"
-/usr/bin/mysqld --user=root --bind-address=0.0.0.0 &
+#echo "Starting mariadb database"
+#/usr/bin/mysqld --user=root --bind-address=0.0.0.0 &
 
 #
 # create pihome users/db etc
 #
-cd /var/www/pihome/MySQL_Database
-php setup_db.php
+#cd /var/www/pihome/MySQL_Database
+#php setup_db.php
